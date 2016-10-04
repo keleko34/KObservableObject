@@ -1,0 +1,28 @@
+{
+  "name": "KObservableObject",
+  "description": "A single layer event based observable object",
+  "version": "1.0.2",
+  "main": "index",
+  "authors": [
+    "Keleko34"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Object",
+    "Binding",
+    "Events",
+    "Listeners"
+  ],
+  "homepage": "https://github.com/keleko34/KObservableObject",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    ".gulp"
+  ],
+  "devDependencies": {
+    "requirejs": "~2.1.11"
+  }
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testing</title>
+    <script type="text/javascript" src="../KObservableObject/Build/KObservableObject.js"></script>
+  </head>
+  <body>
+    <h1 id="testDiv">Test Title</h1>
+    <input id="testInput" type="text" />
+    <input id="testInputBox" type="checkbox" />
+    <input id="testInputRadio" type="radio" />
+    <textarea id="testTextarea"></textarea>
+    <div id="testDisplay"></div>
+    <script type="text/javascript">
+        var OObj = CreateKObservableObject("test");
+
+        OObj.add("test",500);
+        OObj.add("test1",600);
+        OObj.add("test2",700);
+        OObj.add("test3",800);
+
+        OObj.subscribe("test",function(e){
+          console.log(e);
+          console.log("change happend on test, ",e.value,e.oldValue,e.local.test);
+        })
+        .subscribe("test1",function(e){
+          console.log(e);
+          console.log("change happend on test1, ",e.value,e.oldValue,e.local.test1);
+        })
+
+        OObj.onadd = function(e){
+          console.log(e);
+          console.log("onadd happened: ",e.value,e.key);
+        }
+
+        OObj.onremove = function(e){
+          console.log(e);
+          console.log("onremove happened: ",e.value,e.key);
+        }
+
+        OObj.onset = function(e){
+          console.log(e);
+          console.log("onset happened: ",e.value,e.oldValue,e.key);
+        }
+
+        OObj.onupdate = function(e){
+          console.log(e);
+          console.log("onupdate happened: ",e.value,e.oldValue,e.key);
+        }
+
+        OObj.test = 2000;
+
+        OObj.addActionListener('set',function(e){
+          console.log(e);
+          console.log('a push happened ',e.value,e.key);
+        })
+
+        OObj.set("test2",600);
+        OObj.test1 = 200;
+
+        console.log(OObj.test,OObj.test1,OObj.test2,OObj.test3);
+    </script>
+  </body>
+</html>
