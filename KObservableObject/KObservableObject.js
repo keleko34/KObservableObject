@@ -337,10 +337,10 @@ define([],function(){
             __kbdatadeletelisteners:setDescriptor([]),
             addActionListener:setDescriptor(addActionListener),
             removeActionListener:setDescriptor(removeActionListener),
-            onadd:setDescriptor(function(){}),
-            onremove:setDescriptor(function(){}),
-            onset:setDescriptor(function(){}),
-            onupdate:setDescriptor(function(){})
+            onadd:setDescriptor(function(){},true),
+            onremove:setDescriptor(function(){},true),
+            onset:setDescriptor(function(){},true),
+            onupdate:setDescriptor(function(){},true)
         });
 
         Object.defineProperties(_obj,{
