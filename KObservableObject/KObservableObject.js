@@ -118,16 +118,19 @@ define([],function(){
             }
             else
             {
-                var old = this[prop];
-                if(isObservable(this,prop))
-                {
-                    Object.getOwnPropertyDescriptor(this,prop).set.call(this,value,stopChange);
-                }
-                else
-                {
-                    Object.defineProperty(this,prop,setBindDescriptor.call(this,value,prop));
-                }
-                _onaction(this, prop,'set',value,old,arguments);
+              if(_onset(this,prop,'set',value) !== true)
+              {
+                  var old = this[prop];
+                  if(isObservable(this,prop))
+                  {
+                      Object.getOwnPropertyDescriptor(this,prop).set.call(this,value,stopChange);
+                  }
+                  else
+                  {
+                      Object.defineProperty(this,prop,setBindDescriptor.call(this,value,prop));
+                  }
+                  _onaction(this, prop,'set',value,old,arguments);
+              }
             }
             return this;
         }
@@ -148,7 +151,7 @@ define([],function(){
                     enumerable:true,
                     configurable:true
                 });
-                _onaction(this, index,'remove',val,undefined,arguments);   
+                _onaction(this, prop,'remove',val,undefined,arguments);
             }
             return this;
         }
