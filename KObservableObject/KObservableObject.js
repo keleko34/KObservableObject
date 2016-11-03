@@ -101,7 +101,7 @@ define([],function(){
 
         function addPointer(objArr,prop)
         {
-            if(_onadd(this,key,'add',value) !== true)
+            if(_onadd(this,prop,'add',objArr[prop]) !== true)
             {
                 var desc = Object.getOwnPropertyDescriptor(objArr,prop);
                 Object.defineProperty(this,prop,setPointer(objArr,prop,desc));
