@@ -1,7 +1,7 @@
 {
   "name": "KObservableObject",
   "description": "A single layer event based observable object",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "index",
   "authors": [
     "Keleko34"

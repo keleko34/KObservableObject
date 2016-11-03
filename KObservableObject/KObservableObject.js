@@ -286,6 +286,22 @@ define([],function(){
             return this;
         }
 
+        function unsubscribe(prop,func)
+        {
+          if(_subscribers[prop] !== undefined)
+          {
+            loop:for(var x=0,len=_subscribers[prop].length;x<len;x++)
+            {
+                if(_subscribers[prop][x].toString() === func.toString())
+                {
+                  _subscribers[prop].splice(x,1);
+                  break loop;
+                }
+            }
+          }
+          return this;
+        }
+
         function callSubscribers(prop,value,oldValue)
         {
             if(_subscribers[prop] !== undefined)
@@ -312,6 +328,7 @@ define([],function(){
             stringify:setDescriptor(stringify),
             callSubscribers:setDescriptor(callSubscribers),
             subscribe:setDescriptor(subscribe),
+            unsubscribe:setDescriptor(unsubscribe),
             __kblisteners:setDescriptor({}),
             __kbupdatelisteners:setDescriptor({}),
             __kbparentlisteners:setDescriptor({}),
