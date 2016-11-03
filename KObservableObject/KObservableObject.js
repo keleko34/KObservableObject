@@ -45,11 +45,6 @@ define([],function(){
               return e._preventDefault;
             }
 
-        _obj.onadd = function(){};
-        _obj.onremove = function(){};
-        _obj.onset = function(){};
-        _obj.onupdate = function(){};
-
         function eventObject(obj,key,action,value,oldValue,args)
         {
             this.stopPropogation = function(){this._stopPropogration = true;}
@@ -324,7 +319,11 @@ define([],function(){
             __kbdatacreatelisteners:setDescriptor([]),
             __kbdatadeletelisteners:setDescriptor([]),
             addActionListener:setDescriptor(addActionListener),
-            removeActionListener:setDescriptor(removeActionListener)
+            removeActionListener:setDescriptor(removeActionListener),
+            onadd:setDescriptor(function(){}),
+            onremove:setDescriptor(function(){}),
+            onset:setDescriptor(function(){}),
+            onupdate:setDescriptor(function(){})
         });
 
         Object.defineProperties(_obj,{
