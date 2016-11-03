@@ -53,6 +53,7 @@ define([],function(){
         function eventObject(obj,key,action,value,oldValue,args)
         {
             this.stopPropogation = function(){this._stopPropogration = true;}
+            this.preventDefault = function(){this._preventDefault = true;}
             this.local = obj;
             this.key = key;
             this.arguments = args;
