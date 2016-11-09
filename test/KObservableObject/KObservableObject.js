@@ -155,7 +155,7 @@ define([],function(){
         {
             var cache = [];
             return JSON.stringify(this,function(key, value) {
-                if(isArray(value) || isObject(value)) 
+                if(isArray(value) || isObject(value))
                 {
                     if (cache.indexOf(value) !== -1)
                     {
@@ -318,7 +318,7 @@ define([],function(){
 
         Object.defineProperties(_obj,{
             __kbname:setDescriptor((name || ""),true),
-            __kbref:setDescriptor((parent ? (parent.__kbref || parent) : obj),true),
+            __kbref:setDescriptor((parent ? (parent.__kbref || parent) : _obj),true),
             __kbscopeString:setDescriptor((scope || ""),true),
             __kbImmediateParent:setDescriptor((parent || null),true),
             add:setDescriptor(add),
