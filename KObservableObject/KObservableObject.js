@@ -89,7 +89,6 @@ define([],function(){
             else
             {
                 console.error('Your attempting to add the property: ',prop,' that already exists on',this,'try using set or direct set instead');
-                return this;
             }
             return this;
         }
@@ -103,6 +102,19 @@ define([],function(){
                 _onaction(this, (newProp || prop),'add',objArr[prop],undefined,arguments);
             }
             return this;
+        }
+
+        function prototype(prop,value)
+        {
+          if(this[prop] === undefined)
+          {
+              Object.defineProperty(this.__proto__,prop,setDescriptor(value,true,true));
+          }
+          else
+          {
+            console.error('Your attempting to add the your method with the prop: ',prop,' that already exists');
+          }
+          return this;
         }
 
         function set(prop,value,stopChange)
@@ -323,6 +335,7 @@ define([],function(){
             __kbImmediateParent:setDescriptor((parent || null),true,true),
             add:setDescriptor(add),
             addPointer:setDescriptor(addPointer),
+            prototype:setDescriptor(prototype),
             set:setDescriptor(set),
             remove:setDescriptor(remove),
             stringify:setDescriptor(stringify),
