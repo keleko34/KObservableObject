@@ -30,7 +30,7 @@
     "url": "https://github.com/keleko34/KObservableObject/issues"
   },
   "devDependencies": {
-    "K_Tasks": "^0.3.5"
+    "K_Tasks": "^0.4.0"
   },
   "scripts": {
     "build": "gulp build"
