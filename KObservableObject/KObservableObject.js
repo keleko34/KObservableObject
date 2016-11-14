@@ -8,8 +8,11 @@ define([],function(){
             /* actions stored locally */
             _actions = {
                 add:[],
+                postadd:[],
                 set:[],
+                postset:[],
                 remove:[],
+                postremove:[],
                 addDataListener:[],
                 removeDataListener:[],
                 addDataUpdateListener:[],
