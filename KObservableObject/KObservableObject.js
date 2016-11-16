@@ -251,14 +251,15 @@ define([],function(){
             var e = new eventObject(this,prop,'set',value,this[prop],arguments,'__kblisteners'),
                 a = new actionObject('set',prop,e,arguments);
             
-            if(_onaction(a) !== true)
-            {
+
                 if(this[prop] === undefined)
                 {
                     this.add(a.key,a.args[1]);
                 }
                 else
                 {
+                  if(_onaction(a) !== true)
+                  {
                     if(_onevent(e) !== true)
                     {
                         if(isObservable(this,a.key))
@@ -272,8 +273,8 @@ define([],function(){
                         a.type = 'postset';
                         _onaction(a);
                     }
-                }
-            }
+                  }
+              }
             return this;
         }
 
