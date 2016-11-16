@@ -260,6 +260,8 @@ define([],function(){
                 {
                   if(_onaction(a) !== true)
                   {
+                    e.key = a.key;
+                    e.value = a.args[1];
                     if(_onevent(e) !== true)
                     {
                         if(isObservable(this,a.key))
