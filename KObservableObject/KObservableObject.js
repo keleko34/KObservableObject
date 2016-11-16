@@ -37,10 +37,15 @@ define([],function(){
             /* Data based events to alter the data being set */
             _onevent = function(e)
             {
-                for(var x=0,_curr=e.local[e.listener],len=_curr.length;x!==len;x++)
+                var _local = e.local[e.listener];
+                if(isObject(_local)) _local = _local[e.key];
+                if(isArray(_local))
                 {
-                    _curr[x](e);
-                    if(e._stopPropogration) break;
+                    for(var x=0,len=_local.length;x!==len;x++)
+                    {
+                        _local[x](e);
+                        if(e._stopPropogration) break;
+                    }
                 }
                 return e._preventDefault;
             }
@@ -67,46 +72,50 @@ define([],function(){
         {
             this.stopPropogation = function(){this._stopPropogration = true;}
             this.preventDefault = function(){this._preventDefault = true;}
-            this.action = type;
+            this.type = type;
             this.key = prop;
             this.event = ev;
             this.args = args;
         }
 
         /* Main Listening methods */
-        function addListener(type)
+        function addListener(type,listener)
         {
-            var _listeners = this[type];
+            var _listeners = _obj[listener];
             return function(prop,func)
             {
                 var e = new eventObject(this,prop,type,this[prop],this[prop],arguments),
-                    a = new actionObject(type,prop,e,arguments);
+                    a = new actionObject(type,prop,e,arguments),
+                    c
                 
                 if(_onaction(a) !== true)
                 {
-                    _listeners[a.key,a.args[1]];
+                    if(isObject(_listeners) && _listeners[a.key] === undefined) _listeners[a.key] = [];
+                    c = (isObject(_listeners) ? _listeners[a.key] : _listeners);
+                    c.push(a.args[1]);
                 }
                 return this;
             }
         }
 
-        function removeListener(type)
+        function removeListener(type,listener)
         {
-            var _listeners = this[type];
+            var _listeners = _obj[listener];
             return function(prop,func)
             {
                 var e = new eventObject(this,prop,type,this[prop],this[prop],arguments),
-                    a = new actionObject(type,prop,e,arguments);
+                    a = new actionObject(type,prop,e,arguments),
+                    c;
 
                 if(_onaction(a) !== true)
                 {
-                    if(a.args[1] !== undefined) _listeners = _listeners[a.key];
+                    if(a.args[1] !== undefined) c = (isObject(_listeners) ? _listeners[a.key] : _listeners);
 
-                    for(var x=0,len=_listeners.length;x<len;x++)
+                    for(var x=0,len=c.length;x<len;x++)
                     {
-                        if(_listeners[x].toString() === a.args[1].toString())
+                        if(c[x].toString() === a.args[1].toString())
                         {
-                            _listeners.splice(x,1);
+                            c.splice(x,1);
                             return this;
                         }
                     }
@@ -151,12 +160,12 @@ define([],function(){
         /* Helpers */
         function isObject(v)
         {
-            return (typeof v === 'object' && !!v && (String.prototype.toString.call(v) === '[object Object]'));
+            return (typeof v === 'object' && !!v && (v.constructor.toString() === Object.toString()));
         }
 
-        function isArray(v)
+        function isArray(v) 
         {
-            return (Object.prototype.toString.call(v) === '[object Array]');
+            return (typeof v === 'object' && !!v && (v.constructor.toString() === Array.toString()));
         }
 
         function isObservable(obj,prop)
@@ -207,6 +216,8 @@ define([],function(){
                     if(_onevent(e) !== true)
                     {
                         Object.defineProperty(this,a.key,setBindDescriptor.call(this,a.args[1],a.key));
+                        a.type = 'postadd';
+                        _onaction(a);
                     }
                 }
                 else
@@ -228,6 +239,8 @@ define([],function(){
                 {
                     var desc = Object.getOwnPropertyDescriptor(objArr,prop);
                     Object.defineProperty(this,a.key,setPointer(objArr,prop,desc));
+                    a.type = 'postadd';
+                    _onaction(a);
                 }
             }
             return this;
@@ -256,6 +269,8 @@ define([],function(){
                         {
                             Object.defineProperty(this,a.key,setBindDescriptor.call(this,a.args[1],a.key));
                         }
+                        a.type = 'postset';
+                        _onaction(a);
                     }
                 }
             }
@@ -283,6 +298,8 @@ define([],function(){
                         enumerable:true,
                         configurable:true
                     });
+                    a.type = 'postremove';
+                    _onaction(a);
                 }
             }
             return this;
@@ -380,11 +397,9 @@ define([],function(){
         {
             if(_subscribers[prop] !== undefined)
             {
-                var e = new eventObject(this,prop,'subscriber',value,oldValue);
                 for(var x=0,len=_subscribers[prop].length;x<len;x++)
                 {
-                    _subscribers[prop][x](e);
-                    if(e._stopPropogration) break;
+                    _subscribers[prop][x](value);
                 }
             }
             return this;
@@ -420,14 +435,14 @@ define([],function(){
         });
 
         Object.defineProperties(_obj,{
-            addDataListener:setDescriptor(addListener('__kblisteners')),
-            removeDataListener:setDescriptor(removeListener('__kblisteners')),
-            addDataUpdateListener:setDescriptor(addListener('__kbupdatelisteners')),
-            removeDataUpdateListener:setDescriptor(removeListener('__kbupdatelisteners')),
-            addDataCreateListener:setDescriptor(addListener('__kbdatacreatelisteners')),
-            removeDataCreateListener:setDescriptor(removeListener('__kbdatacreatelisteners')),
-            addDataRemoveListener:setDescriptor(addListener('__kbdatadeletelisteners')),
-            removeDataRemoveListener:setDescriptor(removeListener('__kbdatadeletelisteners'))
+            addDataListener:setDescriptor(addListener('addDataListener','__kblisteners')),
+            removeDataListener:setDescriptor(removeListener('removeDataListener','__kblisteners')),
+            addDataUpdateListener:setDescriptor(addListener('addDataUpdateListener','__kbupdatelisteners')),
+            removeDataUpdateListener:setDescriptor(removeListener('removeDataUpdateListener','__kbupdatelisteners')),
+            addDataCreateListener:setDescriptor(addListener('addDataCreateListener','__kbdatacreatelisteners')),
+            removeDataCreateListener:setDescriptor(removeListener('removeDataCreateListener','__kbdatacreatelisteners')),
+            addDataRemoveListener:setDescriptor(addListener('addDataRemoveListener','__kbdatadeletelisteners')),
+            removeDataRemoveListener:setDescriptor(removeListener('removeDataRemoveListener','__kbdatadeletelisteners'))
         });
 
 
