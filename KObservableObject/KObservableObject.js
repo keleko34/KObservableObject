@@ -38,13 +38,58 @@ define([],function(){
             _onevent = function(e)
             {
                 var _local = e.local[e.listener];
-                if(isObject(_local)) _local = _local[e.key];
+                if(isObject(_local))
+                {
+                  _local = _local[e.key];
+                  var _localAll = _localAll['*'];
+                }
                 if(isArray(_local))
                 {
                     for(var x=0,len=_local.length;x!==len;x++)
                     {
                         _local[x](e);
                         if(e._stopPropogration) break;
+                    }
+
+                    if(!e._stopPropogration && _localAll)
+                    {
+                      for(var x=0,len=_localAll.length;x!==len;x++)
+                      {
+                          _localAll[x](e);
+                          if(e._stopPropogration) break;
+                      }
+                    }
+
+                    if(!e._stopPropogration)
+                    {
+                      if(e.listener === '__kblisteners')
+                      {
+                        e.listener = '__kbparentlisteners';
+                      }
+                      else if(e.listener === '__kbupdatelisteners')
+                      {
+                        e.listener = '__kbparentupdatelisteners';
+                      }
+
+                      var _parentListeners = e.local[e.listener][e.key],
+                          _parentAll = e.local[e.listener]['*'];
+                      if(_parentListeners)
+                      {
+                        for(var x=0,len=_parentListeners.length;x!==len;x++)
+                        {
+                            _parentListeners[x](e);
+                            if(e._stopPropogration) break;
+                        }
+                      }
+
+                      if(!e._stopPropogration && _parentAll)
+                      {
+                        for(var x=0,len=_parentAll.length;x!==len;x++)
+                        {
+                            _parentAll[x](e);
+                            if(e._stopPropogration) break;
+                        }
+                      }
                     }
                 }
                 return e._preventDefault;
