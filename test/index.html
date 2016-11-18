@@ -14,6 +14,10 @@
     <script type="text/javascript">
         var OObj = KObservableObject("test");
 
+        OObj.addDataListener('*',function(e){
+          console.log("* fired %s: %O",e.listener,e);
+        })
+
         OObj.addActionListener('add',function(e){
           console.log(e);
         })
@@ -27,17 +31,28 @@
           if(e.key === 'cool') e.preventDefault();
         });
 
+        function somethingListener(e)
+        {
+          console.log(e);
+        }
+
+        function coolListener(e)
+        {
+          console.log(e);
+        }
+
         OObj.set('cool',500)
         .set('something','cool')
-        .addDataListener('cool',function(e){
-          console.log(e);
-        })
-        .addDataListener('something',function(e){
-          console.log(e);
-        })
+        .addDataListener('cool',coolListener)
+        .addDataListener('something',somethingListener)
         .subscribe('cool',function(e){
           console.log(e);
         })
+        .removeDataListener('something',somethingListener);
+
+        OObj.cool = 2000;
+
+        OObj.something = "not cool";
         
     </script>
   </body>

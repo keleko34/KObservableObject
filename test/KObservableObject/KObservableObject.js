@@ -34,20 +34,54 @@ define([],function(){
                 return a._preventDefault;
             },
 
+            _loopEvents = function(events,e)
+            {
+                if(!e._stopPropogration && events)
+                {
+                for (var x = 0, len = events.length; x !== len; x++) {
+                    events[x](e);
+                    if (e._stopPropogration) break;
+                }
+                }
+            },
+
             /* Data based events to alter the data being set */
             _onevent = function(e)
             {
                 var _local = e.local[e.listener];
-                if(isObject(_local)) _local = _local[e.key];
-                if(isArray(_local))
-                {
-                    for(var x=0,len=_local.length;x!==len;x++)
+                    if(isObject(_local))
                     {
-                        _local[x](e);
-                        if(e._stopPropogration) break;
+                      _loopEvents(_local[e.key],e);
+
+                      if(e.listener === '__kblisteners')
+                      {
+                        _loopEvents(_local['*'],e);
+
+                        e.fromListener = '__kblisteners';
+                        e.listener = '__kbparentlisteners';
+
+                        _loopEvents(e.local[e.listener][e.key],e);
+                        _loopEvents(e.local[e.listener]['*'],e);
+
+                      }
+                      else if(e.listener === '__kbupdatelisteners')
+                      {
+                         _loopEvents(_local['*'],e);
+
+                        e.fromListener = '__kbupdatelisteners';
+                        e.listener = '__kbparentupdatelisteners';
+
+                        _loopEvents(e.local[e.listener][e.key],e);
+                        _loopEvents(e.local[e.listener]['*'],e);
+
+                      }
                     }
-                }
-                return e._preventDefault;
+                    else if(isArray(_local))
+                    {
+                       _loopEvents(_local,e);
+                       _loopEvents(_local['*'],e);
+                    }
+                    return e._preventDefault;
             }
         
         /* Event Objects */
@@ -82,17 +116,24 @@ define([],function(){
         function addListener(type,listener)
         {
             var _listeners = _obj[listener];
-            return function(prop,func)
+            return function(prop, func)
             {
-                var e = new eventObject(this,prop,type,this[prop],this[prop],arguments),
-                    a = new actionObject(type,prop,e,arguments),
-                    c
-                
-                if(_onaction(a) !== true)
-                {
-                    if(isObject(_listeners) && _listeners[a.key] === undefined) _listeners[a.key] = [];
-                    c = (isObject(_listeners) ? _listeners[a.key] : _listeners);
-                    c.push(a.args[1]);
+                var e = new eventObject(this, (isObject(_listeners) ? prop : ""), type, (isObject(_listeners) ? this[prop] : ""), (isObject(_listeners) ? this[prop] : ""), arguments),
+                    a = new actionObject(type, (isObject(_listeners) ? prop : ""), e, arguments),
+                    c;
+                if (_onaction(a) !== true) {
+                    if(isObject(_listeners))
+                    {
+                        if(_listeners[a.key] === undefined) _listeners[a.key] = [];
+                        c = _listeners[a.key];
+                        c.push(a.args[1]);
+                    }
+                    else if(isArray(_listeners))
+                    {
+                        if(_listeners['*'] === undefined) _listeners['*'] = [];
+                        c = (a.args[1] && a.args[1] === '*' ? _listeners['*'] : _listeners);
+                        c.push(a.args[0]);
+                    }
                 }
                 return this;
             }
@@ -109,14 +150,32 @@ define([],function(){
 
                 if(_onaction(a) !== true)
                 {
-                    if(a.args[1] !== undefined) c = (isObject(_listeners) ? _listeners[a.key] : _listeners);
-
-                    for(var x=0,len=c.length;x<len;x++)
+                    if(isObject(_listeners))
                     {
-                        if(c[x].toString() === a.args[1].toString())
+                        c = _listeners[a.key];
+                        if(c)
                         {
-                            c.splice(x,1);
-                            return this;
+                          for(var x=0,len=c.length;x<len;x++)
+                          {
+                              if(c[x].toString() === a.args[1].toString())
+                              {
+                                  c.splice(x,1);
+                                  return this;
+                              }
+                          }
+                        }
+                    }
+                    else if(isArray(_listeners))
+                    {
+                        if(_listeners['*'] === undefined) _listeners['*'] = [];
+                        c = (a.args[1] && a.args[1] === '*' ? _listeners['*'] : _listeners);
+                        for(var x=0,len=c.length;x<len;x++)
+                        {
+                            if(c[x].toString() === a.args[0].toString())
+                            {
+                                c.splice(x,1);
+                                return this;
+                            }
                         }
                     }
                 }
@@ -251,14 +310,17 @@ define([],function(){
             var e = new eventObject(this,prop,'set',value,this[prop],arguments,'__kblisteners'),
                 a = new actionObject('set',prop,e,arguments);
             
-            if(_onaction(a) !== true)
-            {
+
                 if(this[prop] === undefined)
                 {
                     this.add(a.key,a.args[1]);
                 }
                 else
                 {
+                  if(_onaction(a) !== true)
+                  {
+                    e.key = a.key;
+                    e.value = a.args[1];
                     if(_onevent(e) !== true)
                     {
                         if(isObservable(this,a.key))
@@ -272,8 +334,8 @@ define([],function(){
                         a.type = 'postset';
                         _onaction(a);
                     }
-                }
-            }
+                  }
+              }
             return this;
         }
 
