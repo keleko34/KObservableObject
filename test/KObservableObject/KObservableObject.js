@@ -474,6 +474,13 @@ define([],function(){
                     _subscribers[prop][x](prop,value,oldValue);
                 }
             }
+            if(_subscribers['*'] !== undefined)
+            {
+                for(var x=0,len=_subscribers['*'].length;x<len;x++)
+                {
+                    _subscribers['*'][x](prop,value,oldValue);
+                }
+            }
             return this;
         }
 
