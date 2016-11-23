@@ -434,24 +434,34 @@ define([],function(){
         /* Subscriber methods */
         function subscribe(prop,func)
         {
-            if(_subscribers[prop] === undefined) _subscribers[prop] = [];
-            _subscribers[prop].push(func);
+            var e = new eventObject(this,prop,'subscribe',this[prop],undefined,arguments),
+                a = new actionObject('subscribe',prop,e,arguments);
+            if(_onaction(a) !== true)
+            {
+                if(_subscribers[a.key] === undefined) _subscribers[a.key] = [];
+                _subscribers[a.key].push(func);
+            }
             return this;
         }
 
         function unsubscribe(prop,func)
         {
-          if(_subscribers[prop] !== undefined)
-          {
-            loop:for(var x=0,len=_subscribers[prop].length;x<len;x++)
+            var e = new eventObject(this,prop,'unsubscribe',this[prop],undefined,arguments),
+                a = new actionObject('unsubscribe',prop,e,arguments);
+            if(_onaction(a) !== true)
             {
-                if(_subscribers[prop][x].toString() === func.toString())
+                if(_subscribers[a.key] !== undefined)
                 {
-                  _subscribers[prop].splice(x,1);
-                  break loop;
+                    loop:for(var x=0,len=_subscribers[a.key].length;x<len;x++)
+                    {
+                        if(_subscribers[a.key][x].toString() === func.toString())
+                        {
+                            _subscribers[a.key].splice(x,1);
+                            break loop;
+                        }
+                    }
                 }
             }
-          }
           return this;
         }
 
@@ -461,7 +471,7 @@ define([],function(){
             {
                 for(var x=0,len=_subscribers[prop].length;x<len;x++)
                 {
-                    _subscribers[prop][x](value);
+                    _subscribers[prop][x](prop,value,oldValue);
                 }
             }
             return this;
