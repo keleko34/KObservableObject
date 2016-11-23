@@ -13,6 +13,8 @@ define([],function(){
                 postset:[],
                 remove:[],
                 postremove:[],
+                subscribe:[],
+                unsubscribe:[],
                 addDataListener:[],
                 removeDataListener:[],
                 addDataUpdateListener:[],
