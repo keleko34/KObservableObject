@@ -87,7 +87,7 @@ define([],function(){
             }
         
         /* Event Objects */
-        function eventObject(obj,key,action,value,oldValue,args,listener)
+        function eventObject(obj,key,action,value,oldValue,args,listener,stopChange)
         {
             this.stopPropogation = function(){this._stopPropogration = true;}
             this.preventDefault = function(){this._preventDefault = true;}
@@ -102,6 +102,7 @@ define([],function(){
             this.parent = obj.___kbImmediateParent;
             this.value = value;
             this.oldValue = oldValue;
+            this.stopChange = stopChange;
         }
 
         function actionObject(type,prop,ev,args)
@@ -307,7 +308,7 @@ define([],function(){
             return this;
         }
 
-        function set(prop,value,stopChange)
+        function set(prop,value)
         {
             var e = new eventObject(this,prop,'set',value,this[prop],arguments,'__kblisteners'),
                 a = new actionObject('set',prop,e,arguments);
@@ -327,7 +328,7 @@ define([],function(){
                     {
                         if(isObservable(this,a.key))
                         {
-                            Object.getOwnPropertyDescriptor(this,a.key).set.call(this,a.args[1],stopChange);
+                            this[a.key] = a.args[1];
                         }
                         else
                         {
@@ -377,7 +378,8 @@ define([],function(){
                     return obj[prop];
                 },
                 set:function(v){
-                    obj[prop] = v;
+                    (this._stopChange ? obj.stopChange() : obj)[prop] = v;
+                  this._stopChange = undefined;
                 },
                 enumerable:desc.enumerable,
                 configurable:desc.configurable
@@ -401,32 +403,30 @@ define([],function(){
                 _prop = index,
                 _set = function(v,e)
                 {
+
                     _oldValue = _value;
                     _value = v;
+                  if(!e.stopChange)
+                  {
                     e.listener = '__kbupdatelisteners';
                     e.type = 'update';
                     _onevent(e);
+                  }
                 };
             return {
                 get:function(){
                     return _value;
                 },
-                set:function(v,stopChange)
+                set:function(v)
                 {
-                    var e = new eventObject(this,_prop,'set',v,_value,arguments,'__kblisteners');
+                    var e = new eventObject(this,_prop,'set',v,_value,arguments,'__kblisteners',this._stopChange);
 
-                    if(!stopChange)
+                    if(_onevent(e) !== true)
                     {
-                        if(_onevent(e) !== true)
-                        {
-                            _set(v,e);
-                            this.callSubscribers(_prop,_value,_oldValue);
-                        }
+                       _set(v,e);
+                       if(!this._stopChange) this.callSubscribers(_prop,_value,_oldValue);
                     }
-                    else
-                    {
-                        _set(v,e);
-                    }
+                  this._stopChange = undefined;
                 },
                 configurable:true,
                 enumerable:true
@@ -486,6 +486,12 @@ define([],function(){
             return this;
         }
 
+        function stopChange()
+        {
+          this._stopChange = true;
+          return this;
+        }
+
         /* Define all properties */
         Object.defineProperties(_obj,{
             __kbname:setDescriptor((name || ""),true,true),
@@ -512,7 +518,8 @@ define([],function(){
             onadd:setDescriptor(function(){},true),
             onremove:setDescriptor(function(){},true),
             onset:setDescriptor(function(){},true),
-            onupdate:setDescriptor(function(){},true)
+            onupdate:setDescriptor(function(){},true),
+            stopChange:setDescriptor(stopChange)
         });
 
         Object.defineProperties(_obj,{

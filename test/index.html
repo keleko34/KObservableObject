@@ -14,8 +14,8 @@
     <script type="text/javascript">
         var OObj = KObservableObject("test");
 
-        OObj.addDataListener('*',function(e){
-          console.log("* fired %s: %O",e.listener,e);
+        OObj.addDataUpdateListener('*',function(e){
+          console.log("* fired %s %o: %O",e.listener,e.value,e);
         })
 
         OObj.addActionListener('add',function(e){
@@ -50,7 +50,7 @@
         })
         .removeDataListener('something',somethingListener);
 
-        OObj.cool = 2000;
+        OObj.stopChange().cool = 2000;
 
         OObj.something = "not cool";
         
