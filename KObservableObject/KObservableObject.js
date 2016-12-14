@@ -519,7 +519,8 @@ define([],function(){
             onremove:setDescriptor(function(){},true),
             onset:setDescriptor(function(){},true),
             onupdate:setDescriptor(function(){},true),
-            stopChange:setDescriptor(stopChange)
+            stopChange:setDescriptor(stopChange),
+            _stopChange:setDescriptor(undefined,true)
         });
 
         Object.defineProperties(_obj,{
